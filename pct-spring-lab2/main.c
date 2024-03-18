@@ -4,6 +4,9 @@
 #include <inttypes.h>
 #include <time.h>
 
+int l = 2;
+int m = 15000;
+int n = 15000;
 
 double wtime()
 {
@@ -12,7 +15,7 @@ double wtime()
     return ts.tv_sec + ts.tv_nsec * 1E-9;
 }
 
-void matrix_vector_product(double *a, double *b, double *c, int m, int n)
+void matrix_vector_product(double *a, double *b, double *c)
 {
     for (int i = 0; i < m; i++)
     {
@@ -22,9 +25,9 @@ void matrix_vector_product(double *a, double *b, double *c, int m, int n)
     }
 }
 
-void matrix_vector_product_omp(double *a, double *b, double *c, int m, int n)
+void matrix_vector_product_omp(double *a, double *b, double *c)
 {
-#pragma omp parallel
+#pragma omp parallel num_threads(l)
     {
         int nthreads = omp_get_num_threads();
         int threadid = omp_get_thread_num();
@@ -40,7 +43,7 @@ void matrix_vector_product_omp(double *a, double *b, double *c, int m, int n)
     }
 }
 
-void run_serial(int m, int n)
+void run_serial()
 {
     double *a, *b, *c;
     a = malloc(sizeof(*a) * m * n);
@@ -54,7 +57,7 @@ void run_serial(int m, int n)
     for (int j = 0; j < n; j++)
         b[j] = j;
     double t = wtime();
-    matrix_vector_product(a, b, c, m, n);
+    matrix_vector_product(a, b, c);
     t = wtime() - t;
     printf("Elapsed time (serial): %.6f sec.\n", t);
     free(a);
@@ -62,7 +65,7 @@ void run_serial(int m, int n)
     free(c);
 }
 
-void run_parallel(int m, int n)
+void run_parallel()
 {
     double *a, *b, *c;
     // Allocate memory for 2-d array a[m, n]
@@ -77,7 +80,7 @@ void run_parallel(int m, int n)
     for (int j = 0; j < n; j++)
         b[j] = j;
     double t = wtime();
-    matrix_vector_product_omp(a, b, c, m, n);
+    matrix_vector_product_omp(a, b, c);
     t = wtime() - t;
     printf("Elapsed time (parallel): %.6f sec.\n", t);
     free(a);
@@ -87,11 +90,19 @@ void run_parallel(int m, int n)
 
 int main(int argc, char **argv)
 {
-    int m = 100;
-    int n = 100;
-    printf("Matrix-vector product (c[m] = a[m, n] * b[n]; m = %d, n = %d)\n", m, n);
-    printf("Memory used: %" PRIu64 " MiB\n", ((m * n + m + n) * sizeof(double)) >> 20);
-    run_serial(m, n);
-    run_parallel(m, n);
+
+    for (int j = n; j <= 25000; j += 5000)
+    {
+        n = m = j;
+        printf("Matrix-vector product (c[m] = a[m, n] * b[n]; m = %d, n = %d)\n", m, n);
+        for (int k = 2; k <= 8; k += 2)
+        {
+            l = k;
+            printf("Memory used: %" PRIu64 " MiB\n", ((m * n + m + n) * sizeof(double)) >> 20);
+            printf("count thread = %d\n",l);
+            run_serial();
+            run_parallel();
+        }
+    }
     return 0;
 }
