@@ -39,3 +39,5 @@ int main(int argc, char **argv)
     printf("Elapsed time (sec.): %.12f\n", t);
     return 0;
 }
+
+//gcc -Wall -fopenmp midpoint_rule.c -lm

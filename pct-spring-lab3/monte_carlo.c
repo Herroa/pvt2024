@@ -1,11 +1,10 @@
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <features.h>
 #define _POSIX_C_SOURCE 1
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 const double PI = 3.14159265358979323846;
-const int n = 10000000;
+
 
 double getrand(unsigned int *seed)
 {
