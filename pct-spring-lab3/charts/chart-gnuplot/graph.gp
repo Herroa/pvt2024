@@ -23,9 +23,15 @@ set ylabel "Speedup" font 'Calibri,16'
 set format y "%.12g"
 
 plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'prog-n10k.dat' using 1:2 title "N=10000" with linespoints ls 2,\
-     'prog-n15k.dat' using 1:2 title "N=15000" with linespoints ls 3,\
-     'prog-n20k.dat' using 1:2 title "N=20000" with linespoints ls 4
-     
+     'rectangles.dat' using 1:2 title "mid rect" with linespoints ls 2,\
+     'carlo_10^7.dat' using 1:2 title "Monte 10^7" with linespoints ls 3,\
+     'carlo_10^8.dat' using 1:2 title "Monte 10^8" with linespoints ls 4
 
+plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
+'rectangles.dat' using 1:2 title "mid rect" with linespoints ls 2
 
+plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
+'carlo_10^7.dat' using 1:2 title "Monte 10^7" with linespoints ls 3
+
+plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
+'carlo_10^8.dat' using 1:2 title "Monte 10^8" with linespoints ls 4
