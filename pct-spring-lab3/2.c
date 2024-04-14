@@ -7,7 +7,7 @@
 #include <math.h>
 
 const double PI = 3.14159265358979323846;
-const int n = 10000000;
+int n = 10000000;
 
 double wtime()
 {
