@@ -1,5 +1,5 @@
 set terminal pdf color enhanced font 'Calibri,16' size 14cm,10cm
-set output 'graph.pdf'
+set output 'nblocks_graph.pdf'
 set key inside left top font 'Calibri,16'
 set colorsequence podo
 set style line 1 lc rgb 'blue' lw 1 pt 5 ps 0.5
@@ -23,15 +23,4 @@ set ylabel "Speedup" font 'Calibri,16'
 set format y "%.12g"
 
 plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-     'rectangles.dat' using 1:2 title "mid rect" with linespoints ls 2,\
-     'carlo_10^7.dat' using 1:2 title "Monte 10^7" with linespoints ls 3,\
-     'carlo_10^8.dat' using 1:2 title "Monte 10^8" with linespoints ls 4
-
-plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-'rectangles.dat' using 1:2 title "mid rect" with linespoints ls 2
-
-plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-'carlo_10^7.dat' using 1:2 title "Monte 10^7" with linespoints ls 3
-
-plot x title "Linear speedup" with lines lc rgb 'blue' lt 1 lw 2,\
-'carlo_10^8.dat' using 1:2 title "Monte 10^8" with linespoints ls 4
+     'blocks.dat' using 1:2 title "nblocks" with linespoints ls 2
