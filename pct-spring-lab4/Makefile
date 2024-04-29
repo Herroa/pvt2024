@@ -19,7 +19,7 @@ clean:
 run: all
 	@for dir in $(SRCDIRS); do \
 		echo "Running program in $$dir..."; \
-		./$$dir/main; \
+		./$$dir/main 20; \
 		echo "Generating graph in $$dir..."; \
 		gnuplot $$dir/graph.gp; \
 	done
