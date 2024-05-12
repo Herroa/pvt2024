@@ -1,25 +1,24 @@
 CC = gcc
 CFLAGS = -Wall -fopenmp -lm
 
-SRCDIRS := atomic blocks computation critical local_vector
-TARGETS := $(SRCDIRS:%=%/main)
+# Получаем список всех файлов с расширением .c в текущем каталоге
+SRCS := $(wildcard *.c)
 
-.PHONY: all clean run
+# Формируем имена исполняемых файлов из имен исходных файлов
+BINS := $(SRCS:.c=)
 
-all: $(TARGETS)
+all: $(BINS)
 
-%/main: %/main.c
-	$(CC) -o $@ $< $(CFLAGS) 
+# Правило для компиляции каждого исходного файла в отдельную программу
+%: %.c
+	$(CC) -o $@ $< $(CFLAGS)
+
+
+run: $(BINS)
+	@for bin in $(BINS); do \
+		echo "Running $$bin..."; \
+		./$$bin 30; \
+	done
 
 clean:
-	rm -f $(TARGETS)
-	rm -f *.pdf
-	rm -f *.dat
-
-run: all
-	@for dir in $(SRCDIRS); do \
-		echo "Running program in $$dir..."; \
-		./$$dir/main 20; \
-		echo "Generating graph in $$dir..."; \
-		gnuplot $$dir/graph.gp; \
-	done
+	rm -f $(BINS)
