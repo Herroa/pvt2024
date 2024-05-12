@@ -70,53 +70,58 @@ void move_particles(struct particle *p, struct particle *f, struct particle *v,
 
 int main(int argc, char *argv[])
 {
-
-  double ttotal, tinit = 0, tforces = 0, tmove = 0;
-
-  ttotal = wtime();
-  int n = (argc > 1) ? atoi(argv[1]) : 10;
-  char *filename = (argc > 2) ? argv[2] : NULL;
-
-  tinit = wtime();
-  struct particle *p = malloc(sizeof(*p) * n); // Положение частиц (x, y, z)
-  struct particle *f = malloc(
-      sizeof(*f) * n);                         // Сила, действующая на каждую частицу (x, y, z)
-  struct particle *v = malloc(sizeof(*v) * n); // Скорость частицы (x, y, z)
-  float *m = malloc(sizeof(*m) * n);           // Масса частицы
-  for (int i = 0; i < n; i++)
+  double ttotal, tinit = 0, tforces = 0, tmove = 0, min = 25.24342;
+  FILE *file;
+  file = fopen("data/critical.dat", "w");
+  for (int i = 0; i <= 8; i += 2)
   {
-    p[i].x = rand() / (float)RAND_MAX - 0.5;
-    p[i].y = rand() / (float)RAND_MAX - 0.5;
-    p[i].z = rand() / (float)RAND_MAX - 0.5;
-    v[i].x = rand() / (float)RAND_MAX - 0.5;
-    v[i].y = rand() / (float)RAND_MAX - 0.5;
-    v[i].z = rand() / (float)RAND_MAX - 0.5;
-    m[i] = rand() / (float)RAND_MAX * 10 + 0.01;
-    f[i].x = f[i].y = f[i].z = 0;
+    ttotal = wtime();
+    int n = (argc > 1) ? atoi(argv[1]) : 10;
+    char *filename = (argc > 2) ? argv[2] : NULL;
+
+    tinit = -wtime();
+    struct particle *p = malloc(sizeof(*p) * n); // Положение частиц (x, y, z)
+    struct particle *f = malloc(
+        sizeof(*f) * n);                         // Сила, действующая на каждую частицу (x, y, z)
+    struct particle *v = malloc(sizeof(*v) * n); // Скорость частицы (x, y, z)
+    float *m = malloc(sizeof(*m) * n);           // Масса частицы
+    for (int i = 0; i < n; i++)
+    {
+      p[i].x = rand() / (float)RAND_MAX - 0.5;
+      p[i].y = rand() / (float)RAND_MAX - 0.5;
+      p[i].z = rand() / (float)RAND_MAX - 0.5;
+      v[i].x = rand() / (float)RAND_MAX - 0.5;
+      v[i].y = rand() / (float)RAND_MAX - 0.5;
+      v[i].z = rand() / (float)RAND_MAX - 0.5;
+      m[i] = rand() / (float)RAND_MAX * 10 + 0.01;
+      f[i].x = f[i].y = f[i].z = 0;
+    }
+    tinit += wtime();
+
+    double dt = 1e-5;
+#pragma omp parallel num_threads( \
+        i) // Параллельный регион активируется один раз
+    {
+      for (double t = 0; t <= 1; t += dt)
+      {
+        calculate_forces(p, f, m, n);
+#pragma omp barrier // Ожидание завершения расчетов f[i]
+        move_particles(p, f, v, m, n, dt);
+#pragma omp barrier // Ожидание завершения обновления p[i], f[i]
+      }
+    }
+    ttotal = wtime() - ttotal;
+    printf("# NBody (n=%d)\n", n);
+    printf("# Elapsed time (sec): ttotal %.6f, tinit %.6f, nthreads  %d\n",
+           ttotal, tinit, i);
+    // if(i == 0){min = ttotal;}
+    fprintf(file, "%d %f\n", i, min / ttotal);
+
+    free(m);
+    free(v);
+    free(f);
+    free(p);
   }
-  tinit = wtime() - tinit;
-
-  double dt = 1e-5;
-  for (double t = 0; t <= 1; t += dt)
-  { // Цикл по времени (модельному)
-
-    tforces = wtime();
-    calculate_forces(p, f, m, n); // Вычисление сил – O(N^2)
-    tforces = wtime() - tforces;
-
-    tmove = wtime();
-    move_particles(p, f, v, m, n, dt); // Перемещение тел O(N)
-    tmove = wtime() - tmove;
-  }
-  ttotal = wtime() - ttotal;
-  printf("# NBody (n=%d)\n", n);
-  printf("# Elapsed time (sec): ttotal %.6f, tinit %.6f, tforces %.6f, tmove "
-         "%.6f\n",
-         ttotal, tinit, tforces, tmove);
-  free(m);
-  free(v);
-  free(f);
-  free(p);
-
+  fclose(file);
   return 0;
 }
